@@ -40,7 +40,7 @@ def converti_p7m_in_xml(fe_path):
     file = os.listdir(fe_path)
     files_converted = []
 
-   for x in range(len(file)):
+    for x in range(len(file)):
         full_file_path = os.path.join(fe_path, file[x])
         if ".p7m" in file[x]:
             xml_output_path = os.path.join(fe_path, f"{file[x]}.xml")
