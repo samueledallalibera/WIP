@@ -5,6 +5,8 @@ import streamlit as st
 import zipfile
 import io
 import shutil
+import subprocess
+import zipfile
 
 # Funzione gestione errori
 def gestisci_errore_parsing(filename, errore):
@@ -32,6 +34,29 @@ def extract_zip(zip_file):
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extractall(extracted_folder)
     return extracted_folder
+
+# Funzione per decodificare e convertire i file .p7m in .xml
+def converti_p7m_in_xml(fe_path):
+    file = os.listdir(fe_path)
+
+    for x in range(len(file)):
+        full_file_path = os.path.join(fe_path, file[x])
+        if ".p7m" in file[x]:
+            xml_output_path = os.path.join(fe_path, f"{x}.xml")
+            os.system(f'openssl smime -verify -noverify -in "{full_file_path}" -inform DER -out "{xml_output_path}"')
+            os.remove(full_file_path)  # Rimuovi il file .p7m originale
+            st.write(f"File {file[x]} convertito in XML.")
+
+# Funzione per creare una zip con i file convertiti
+def create_zip_with_converted_files(fe_path):
+    zip_filename = "/tmp/converted_files.zip"
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for root, dirs, files in os.walk(fe_path):
+            for file in files:
+                if file.endswith('.xml'):
+                    zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), fe_path))
+    return zip_filename
+
 
 # Funzione per estrarre e parsare il file XML
 def parse_xml_file(xml_file_path, includi_dettaglio_linee=True):
@@ -188,24 +213,21 @@ if uploaded_file is not None:
 
     # Estrazione file ZIP
     extracted_folder = extract_zip(uploaded_file)
+    
+    # Converti i file .p7m in .xml
+    converti_p7m_in_xml(extracted_folder)
 
-    # Mostra l'opzione per includere il dettaglio delle linee
-    includi_dettaglio_linee = st.radio(
-        "Vuoi includere il dettaglio delle linee?",
-        ("Sì", "No")
-    ) == "Sì"
+    # Creare una nuova cartella ZIP con i file convertiti
+    zip_filename = create_zip_with_converted_files(extracted_folder)
 
-    # Elabora i dati una volta che l'utente ha scelto l'opzione
-    all_data_df = process_all_files(extracted_folder, includi_dettaglio_linee)
+    # Aggiungi un pulsante per scaricare il file ZIP con i file convertiti
+    with open(zip_filename, "rb") as f:
+        st.download_button(
+            label="Scarica i file convertiti",
+            data=f,
+            file_name="converted_files.zip",
+            mime="application/zip"
+        )
+     st.success('Conversione completata e file .zip pronto per il download!')
 
-    if not all_data_df.empty:
-        # Selezione delle colonne da esportare
-        colonne_da_esportare = seleziona_colonne(all_data_df, colonne_default)
 
-        if colonne_da_esportare:
-            colonne_esistenti = [col for col in colonne_da_esportare if col in all_data_df.columns]
-            esporta_excel(all_data_df, colonne_esistenti)
-        else:
-            st.warning("Nessuna colonna è stata selezionata per l'esportazione.")
-    else:
-        st.warning("Non sono stati trovati dati da processare.")
