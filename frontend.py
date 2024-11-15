@@ -40,32 +40,31 @@ def converti_p7m_in_xml(fe_path):
     file = os.listdir(fe_path)
     files_converted = []
 
+    # Scorre tutti i file nella cartella estratta
     for x in range(len(file)):
         full_file_path = os.path.join(fe_path, file[x])
+        # Verifica se il file è un .p7m
         if ".p7m" in file[x]:
             xml_output_path = os.path.join(fe_path, f"{file[x]}.xml")
-            # Verifica se la conversione ha successo
             try:
+                # Esegui il comando per convertire il .p7m in .xml
                 result = subprocess.run(
                     ['openssl', 'smime', '-verify', '-noverify', '-in', full_file_path, '-inform', 'DER', '-out', xml_output_path],
                     check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
                 st.write(f"File {file[x]} convertito in XML.")
                 files_converted.append(xml_output_path)
-                os.remove(full_file_path)  # Rimuovi il file .p7m originale dopo la conversione
+                os.remove(full_file_path)  # Rimuovi il file .p7m originale
             except subprocess.CalledProcessError as e:
                 st.write(f"Errore nella conversione del file {file[x]}: {e.stderr.decode()}")
     return files_converted
 
-
 # Funzione per creare una zip con i file convertiti
-def create_zip_with_converted_files(fe_path):
+def create_zip_with_converted_files(fe_path, converted_files):
     zip_filename = "/tmp/converted_files.zip"
     with zipfile.ZipFile(zip_filename, 'w') as zipf:
-        for root, dirs, files in os.walk(fe_path):
-            for file in files:
-                if file.endswith('.xml'):
-                    zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), fe_path))
+        for file_path in converted_files:
+            zipf.write(file_path, os.path.relpath(file_path, fe_path))
     return zip_filename
 
 
