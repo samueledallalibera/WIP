@@ -223,13 +223,13 @@ if uploaded_file is not None:
     all_data_df = None
 
     # Estrazione file ZIP
-    extracted_folder = extract_zip(uploaded_file)
+    extracted_folder = extract_zip(uploaded_zip)
     
     # Converti i file .p7m in .xml
-    converti_p7m_in_xml(extracted_folder)
+    converted_files = converti_p7m_in_xml(extracted_folder)
 
     # Creare una nuova cartella ZIP con i file convertiti
-    zip_filename = create_zip_with_converted_files(extracted_folder)
+    zip_filename = create_zip_with_converted_files(extracted_folder, converted_files)  # Passa converted_files come argomento
 
     # Aggiungi un pulsante per scaricare il file ZIP con i file convertiti
     with open(zip_filename, "rb") as f:
