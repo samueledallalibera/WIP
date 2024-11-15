@@ -68,6 +68,7 @@ def create_zip_with_converted_files(fe_path, converted_files):
     return zip_filename
 
 
+
 # Funzione per estrarre e parsare il file XML
 def parse_xml_file(xml_file_path, includi_dettaglio_linee=True):
     try:
