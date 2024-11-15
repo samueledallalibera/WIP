@@ -226,8 +226,9 @@ if uploaded_file is not None:
             label="Scarica i file convertiti",
             data=f,
             file_name="converted_files.zip",
-            mime="application/zip"
+           mime="application/zip"
         )
-     st.success('Conversione completata e file .zip pronto per il download!')
+
+    st.success('Conversione completata e file .zip pronto per il download!')
 
 
