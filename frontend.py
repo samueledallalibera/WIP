@@ -241,6 +241,6 @@ if uploaded_file is not None:
         )
 
     st.success('Conversione completata e file .zip pronto per il download!')
-    else:
-        st.warning("Non ci sono file .p7m da convertire.")
+else:
+    st.warning("Non ci sono file .p7m da convertire.")
 
