@@ -30,9 +30,16 @@ def extract_zip(zip_file):
     if os.path.exists(extracted_folder):
         shutil.rmtree(extracted_folder)
     
+    # Verifica se il file caricato è un file ZIP valido
+    if not zipfile.is_zipfile(zip_file):
+        st.write("Il file caricato non è un file ZIP valido.")
+        return None
+
     # Estrai il nuovo file ZIP
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extractall(extracted_folder)
+        st.write(f"File estratti: {zip_ref.namelist()}")  # Log the extracted files
+
     return extracted_folder
 
 # Funzione per decodificare e convertire i file .p7m in .xml
