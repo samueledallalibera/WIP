@@ -244,3 +244,25 @@ if uploaded_file is not None:
 else:
     st.warning("Non ci sono file .p7m da convertire.")
 
+   # Mostra l'opzione per includere il dettaglio delle linee
+    includi_dettaglio_linee = st.radio(
+        "Vuoi includere il dettaglio delle linee?",
+        ("Sì", "No")
+    ) == "Sì"
+
+    # Elabora i dati una volta che l'utente ha scelto l'opzione
+    all_data_df = process_all_files(extracted_folder, includi_dettaglio_linee)
+
+    if not all_data_df.empty:
+        # Selezione delle colonne da esportare
+        colonne_da_esportare = seleziona_colonne(all_data_df, colonne_default)
+
+        if colonne_da_esportare:
+            colonne_esistenti = [col for col in colonne_da_esportare if col in all_data_df.columns]
+            esporta_excel(all_data_df, colonne_esistenti)
+        else:
+            st.warning("Nessuna colonna è stata selezionata per l'esportazione.")
+    else:
+        st.warning("Non sono stati trovati dati da processare.")
+
+
