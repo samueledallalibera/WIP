@@ -223,7 +223,7 @@ if uploaded_file is not None:
     all_data_df = None
 
     # Estrazione file ZIP
-    extracted_folder = extract_zip(uploaded_zip)
+    extracted_folder = extract_zip(uploaded_file)
     
     # Converti i file .p7m in .xml
     converted_files = converti_p7m_in_xml(extracted_folder)
