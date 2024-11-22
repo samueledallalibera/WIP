@@ -23,22 +23,21 @@ def parse_element(element, parsed_data, parent_tag=""):
             parsed_data[tag_name] = child.text
 
 # Funzione per estrarre il contenuto di un file ZIP
-def extract_zip(zip_file):
+def extract_zip(uploaded_file):
     extracted_folder = "/tmp/extracted"  # Percorso temporaneo per i file estratti
 
     # Rimuovi la cartella estratta precedente, se esiste
     if os.path.exists(extracted_folder):
         shutil.rmtree(extracted_folder)
-    
-    # Verifica se il file caricato è un file ZIP valido
-    if not zipfile.is_zipfile(zip_file):
+
+    # Leggi il file caricato come bytes
+    try:
+        with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
+            zip_ref.extractall(extracted_folder)
+            st.write(f"File estratti: {zip_ref.namelist()}")  # Log the extracted files
+    except zipfile.BadZipFile:
         st.write("Il file caricato non è un file ZIP valido.")
         return None
-
-    # Estrai il nuovo file ZIP
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        zip_ref.extractall(extracted_folder)
-        st.write(f"File estratti: {zip_ref.namelist()}")  # Log the extracted files
 
     return extracted_folder
 
@@ -221,16 +220,13 @@ st.title("Analisi XML Fatture Elettroniche")
 # Carica un nuovo file ZIP per l'elaborazione
 uploaded_file = st.file_uploader("Carica il file ZIP contenente i file XML", type=["zip"], key="file_uploader")
 
-# Variabile per memorizzare i dati
-all_data_df = None
-
 # Reset dei dati quando viene caricato un nuovo file
 if uploaded_file is not None:
-    # Reset dei dati precedenti
-    all_data_df = None
+    # Leggi il file come bytes
+    uploaded_file_bytes = uploaded_file.read()
 
     # Estrazione file ZIP
-    extracted_folder = extract_zip(uploaded_file)
+    extracted_folder = extract_zip(io.BytesIO(uploaded_file_bytes))
     
     # Converti i file .p7m in .xml
     converted_files = converti_p7m_in_xml(extracted_folder)
